@@ -58,9 +58,11 @@ class Splashpage extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                          primary: purpleColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(17))),
+                        primary: purpleColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(17),
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 50),
