@@ -14,20 +14,22 @@ class SpacesCard extends StatelessWidget {
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const DetailPage(),
+            builder: (context) => DetailPage(space),
           )),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
-            child: Container(
-              width: 130,
+            child: SizedBox(
+              width: 120,
               height: 110,
-              color: Colors.amber,
               child: Stack(
                 children: [
-                  Image.asset(
+                  Image.network(
                     space.imageUrl!,
+                    width: 120,
+                    height: 110,
+                    fit: BoxFit.cover,
                   ),
                   Align(
                     alignment: Alignment.topRight,
@@ -73,6 +75,8 @@ class SpacesCard extends StatelessWidget {
               Text(
                 space.name!,
                 style: titleTextStyle.copyWith(fontSize: 18),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
               const SizedBox(
                 height: 2,

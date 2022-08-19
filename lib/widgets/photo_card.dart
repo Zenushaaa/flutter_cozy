@@ -11,8 +11,11 @@ class PhotosCard extends StatelessWidget {
       child: SizedBox(
         height: 88,
         width: 110,
-        child: Image.asset(
+        // margin: const EdgeInsets.only(left: 24),
+        child: Image.network(
           imageUrl!,
+          height: 88,
+          width: 110,
           fit: BoxFit.cover,
         ),
       ),

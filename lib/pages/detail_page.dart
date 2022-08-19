@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cozy/models/space.dart';
 import 'package:flutter_cozy/pages/error_page.dart';
 import 'package:flutter_cozy/theme.dart';
 import 'package:flutter_cozy/widgets/facilities_item.dart';
 import 'package:flutter_cozy/widgets/photo_card.dart';
+import 'package:flutter_cozy/widgets/rating_item.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-class DetailPage extends StatelessWidget {
-  const DetailPage({Key? key}) : super(key: key);
+class DetailPage extends StatefulWidget {
+  final Space spaces;
+
+  DetailPage(this.spaces, {Key? key}) : super(key: key);
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool isWishlist = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +36,34 @@ class DetailPage extends StatelessWidget {
       }
     }
 
+    Future<void> confirmation() async {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Confirmation'),
+          content: const Text('Do you want to contact the landlord?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _launchUrl('tel:+${widget.spaces.phoneNumber}');
+              },
+              child: const Text('Call'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset(
-            'assets/images/thumbnail.png',
+          Image.network(
+            widget.spaces.imageUrl!,
             width: MediaQuery.of(context).size.width,
             height: 350,
             fit: BoxFit.cover,
@@ -63,15 +97,15 @@ class DetailPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Kuretakeso Hott',
-                                style: titleTextStyle.copyWith(fontSize: 22),
+                                widget.spaces.name!,
+                                style: titleTextStyle.copyWith(fontSize: 20),
                               ),
                               const SizedBox(
                                 height: 2,
                               ),
                               Text.rich(
                                 TextSpan(
-                                  text: '\$52',
+                                  text: '\$${widget.spaces.price}',
                                   style: numberTextStyle.copyWith(
                                     fontSize: 16,
                                   ),
@@ -89,41 +123,16 @@ class DetailPage extends StatelessWidget {
                           ),
                           // NOTE : STAR
                           Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/Icon_star.png',
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Image.asset(
-                                'assets/images/Icon_star.png',
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Image.asset(
-                                'assets/images/Icon_star.png',
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Image.asset(
-                                'assets/images/Icon_star.png',
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Image.asset(
-                                'assets/images/Icon_star.png',
-                                width: 20,
-                                color: const Color(0xFF989BA1),
-                              ),
-                            ],
+                            children: [1, 2, 3, 4, 5].map((index) {
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                  left: 2,
+                                ),
+                                child: RatingItem(
+                                    index: index,
+                                    rating: widget.spaces.rating!),
+                              );
+                            }).toList(),
                           )
                         ],
                       ),
@@ -146,21 +155,21 @@ class DetailPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
+                        children: [
                           FacilitiesItem(
                             imageUrl: 'assets/images/001-bar-counter.png',
                             nameFacilities: 'Kitchen',
-                            numberFacilities: 2,
+                            numberFacilities: widget.spaces.numberKitchen,
                           ),
                           FacilitiesItem(
                             imageUrl: 'assets/images/002-double-bed.png',
                             nameFacilities: 'Bedroom',
-                            numberFacilities: 3,
+                            numberFacilities: widget.spaces.numberBedroom,
                           ),
                           FacilitiesItem(
                             imageUrl: 'assets/images/003-cupboard.png',
                             nameFacilities: 'Big Lemari',
-                            numberFacilities: 3,
+                            numberFacilities: widget.spaces.numberCupboards,
                           ),
                         ],
                       ),
@@ -182,37 +191,17 @@ class DetailPage extends StatelessWidget {
                     SizedBox(
                       height: 88,
                       child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: const [
-                          SizedBox(
-                            width: 24,
-                          ),
-                          PhotosCard(
-                            imageUrl: 'assets/images/image 18.png',
-                          ),
-                          SizedBox(
-                            width: 18,
-                          ),
-                          PhotosCard(
-                            imageUrl: 'assets/images/image 19.png',
-                          ),
-                          SizedBox(
-                            width: 18,
-                          ),
-                          PhotosCard(
-                            imageUrl: 'assets/images/image 17.png',
-                          ),
-                          SizedBox(
-                            width: 18,
-                          ),
-                          PhotosCard(
-                            imageUrl: 'assets/images/image 14.png',
-                          ),
-                          SizedBox(
-                            width: 24,
-                          ),
-                        ],
-                      ),
+                          scrollDirection: Axis.horizontal,
+                          children: widget.spaces.photos!.map((item) {
+                            return Container(
+                              margin: const EdgeInsets.only(
+                                left: 24,
+                              ),
+                              child: PhotosCard(
+                                imageUrl: item,
+                              ),
+                            );
+                          }).toList()),
                     ),
                     const SizedBox(
                       height: 30,
@@ -236,13 +225,12 @@ class DetailPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Jln. Kappan Sukses No. 20\nPalembang',
+                            '${widget.spaces.address}\n${widget.spaces.city}',
                             style: subtitleTextStyle.copyWith(
                                 fontSize: 14, fontWeight: FontWeight.w400),
                           ),
                           InkWell(
-                            onTap: () => _launchUrl(
-                                'https://goo.gl/maps/zWYnyQ9CsHYShxwH6'),
+                            onTap: () => _launchUrl('${widget.spaces.mapUrl}'),
                             child: Image.asset(
                               'assets/images/btn_location.png',
                               width: 40,
@@ -260,7 +248,7 @@ class DetailPage extends StatelessWidget {
                         horizontal: 24,
                       ),
                       child: ElevatedButton(
-                        onPressed: () => _launchUrl('tel:+123123123'),
+                        onPressed: () => confirmation(),
                         style: ElevatedButton.styleFrom(
                           fixedSize:
                               Size(MediaQuery.of(context).size.width, 50),
@@ -301,9 +289,18 @@ class DetailPage extends StatelessWidget {
                     width: 40,
                   ),
                 ),
-                Image.asset(
-                  'assets/images/btn_wishlist.png',
-                  width: 40,
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      isWishlist = !isWishlist;
+                    });
+                  },
+                  child: Image.asset(
+                    isWishlist
+                        ? 'assets/images/btn_wishlist_klik.png'
+                        : 'assets/images/btn_wishlist.png',
+                    width: 40,
+                  ),
                 ),
               ],
             ),
